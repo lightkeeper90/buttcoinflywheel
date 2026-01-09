@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buttcoin Flywheel Ponzi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #ff69b4;
+            --secondary: #ffb6c1;
+            --accent: #ff1493;
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --text: #ffffff;
+            --text-dim: #888;
+            --green: #00ff88;
+            --red: #ff4444;
+            --yellow: #ffd700;
+            --purple: #9945FF;
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* CRT Effects */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+        }
+
+        .crt-flicker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            animation: flicker 0.15s infinite;
+            opacity: 0.03;
+            background: rgba(255, 105, 180, 0.1);
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 0.03; }
+            50% { opacity: 0.05; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 30px 0;
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 30px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .butt-logo {
+            width: 80px;
+            height: 80px;
+            font-size: 60px;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .title {
+            font-size: 20px;
+            color: var(--primary);
+            text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .subtitle {
+            font-size: 10px;
+            color: var(--yellow);
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .header-info {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 5px var(--green); }
+            50% { box-shadow: 0 0 20px var(--green), 0 0 30px var(--green); }
+        }
+
+        .status-text {
+            font-size: 10px;
+            color: var(--green);
+        }
+
+        .countdown-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .countdown-label {
+            font-size: 8px;
+            color: var(--text-dim);
+        }
+
+        .countdown-timer {
+            font-size: 16px;
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+        }
+
+        .stat-icon {
+            font-size: 30px;
+        }
+
+        .stat-content {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stat-label {
+            font-size: 8px;
+            color: var(--text-dim);
+        }
+
+        .stat-value {
+            font-size: 14px;
+            color: var(--primary);
+        }
+
+        /* Contract Section */
+        .contract-section {
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .contract-row {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .contract-item {
+            text-align: center;
+        }
+
+        .contract-label {
+            font-size: 8px;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+        }
+
+        .contract-label.og {
+            color: var(--yellow);
+        }
+
+        .contract-address {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .address-text {
+            font-size: 8px;
+            color: var(--secondary);
+            word-break: break-all;
+            max-width: 350px;
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            padding: 8px 15px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 6px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+        }
+
+        /* Flywheel Explanation */
+        .flywheel-explainer {
+            background: linear-gradient(135deg, rgba(255, 105, 180, 0.1), rgba(153, 69, 255, 0.1));
+            border: 2px solid var(--yellow);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .flywheel-title {
+            font-size: 12px;
+            color: var(--yellow);
+            margin-bottom: 15px;
+        }
+
+        .flywheel-steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .flywheel-step {
+            background: var(--bg-card);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 8px;
+            color: var(--secondary);
+        }
+
+        .flywheel-arrow {
+            font-size: 16px;
+            color: var(--green);
+        }
+
+        .flywheel-desc {
+            font-size: 8px;
+            color: var(--text-dim);
+            line-height: 1.8;
+        }
+
+        /* Wallet Screener */
+        .wallet-screener {
+            background: var(--bg-card);
+            border: 2px solid var(--purple);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .screener-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            color: var(--purple);
+        }
+
+        .screener-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .screener-stat {
+            text-align: center;
+        }
+
+        .screener-stat-label {
+            font-size: 6px;
+            color: var(--text-dim);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .screener-stat-value {
+            font-size: 10px;
+            color: var(--green);
+        }
+
+        .wallet-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .wallet-table th,
+        .wallet-table td {
+            padding: 12px 8px;
+            text-align: left;
+            font-size: 7px;
+            border-bottom: 1px solid rgba(153, 69, 255, 0.2);
+        }
+
+        .wallet-table th {
+            color: var(--text-dim);
+            background: rgba(153, 69, 255, 0.1);
+        }
+
+        .wallet-table td {
+            color: var(--secondary);
+        }
+
+        .wallet-table tr:hover td {
+            background: rgba(153, 69, 255, 0.05);
+        }
+
+        .wallet-address {
+            font-family: monospace;
+            color: var(--purple);
+        }
+
+        .wallet-link {
+            color: var(--purple);
+            text-decoration: none;
+        }
+
+        .wallet-link:hover {
+            text-shadow: 0 0 10px var(--purple);
+        }
+
+        .balance-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .balance-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--purple));
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 6px;
+            font-weight: bold;
+        }
+
+        .status-badge.ready {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--green);
+        }
+
+        .status-badge.pending {
+            background: rgba(255, 215, 0, 0.2);
+            color: var(--yellow);
+        }
+
+        .status-badge.active {
+            background: rgba(255, 105, 180, 0.2);
+            color: var(--primary);
+            animation: glow 1s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px var(--primary); }
+            50% { box-shadow: 0 0 15px var(--primary); }
+        }
+
+        /* Price Card */
+        .price-card {
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .dex-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+
+        .dex-link:hover {
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .price-display {
+            margin-bottom: 10px;
+        }
+
+        .price-value {
+            font-size: 28px;
+            color: var(--green);
+            text-shadow: 0 0 15px var(--green);
+        }
+
+        .price-usd {
+            font-size: 14px;
+            color: var(--text-dim);
+        }
+
+        .price-change {
+            font-size: 12px;
+            padding: 5px 15px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .price-change.positive {
+            color: var(--green);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .price-change.negative {
+            color: var(--red);
+            background: rgba(255, 68, 68, 0.1);
+        }
+
+        /* Burn History */
+        .burn-history {
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .burn-title {
+            font-size: 14px;
+            color: var(--primary);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .burn-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .burn-table th,
+        .burn-table td {
+            padding: 12px;
+            text-align: left;
+            font-size: 8px;
+            border-bottom: 1px solid rgba(255, 105, 180, 0.2);
+        }
+
+        .burn-table th {
+            color: var(--text-dim);
+        }
+
+        .burn-table td {
+            color: var(--secondary);
+        }
+
+        .burn-table tr:hover td {
+            background: rgba(255, 105, 180, 0.05);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-dim);
+            font-size: 10px;
+        }
+
+        /* Deposit Section */
+        .deposit-section {
+            background: var(--bg-card);
+            border: 2px solid var(--green);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .deposit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .deposit-title {
+            color: var(--green) !important;
+        }
+
+        .wallet-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        .wallet-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .wallet-dot.disconnected {
+            background: var(--red);
+            box-shadow: 0 0 10px var(--red);
+        }
+
+        .wallet-dot.connected {
+            background: var(--green);
+            box-shadow: 0 0 10px var(--green);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .wallet-text {
+            font-size: 8px;
+            color: var(--text-dim);
+        }
+
+        .deposit-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .connect-wallet-box {
+            text-align: center;
+            padding: 40px 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .phantom-logo {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .connect-prompt {
+            font-size: 10px;
+            color: var(--text-dim);
+            margin-bottom: 25px;
+            line-height: 1.8;
+        }
+
+        .phantom-btn {
+            background: linear-gradient(135deg, #ab9ff2, #7c3aed);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            cursor: pointer;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(171, 159, 242, 0.3);
+        }
+
+        .phantom-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(171, 159, 242, 0.5);
+        }
+
+        .phantom-icon {
+            font-size: 16px;
+        }
+
+        .wallet-note {
+            font-size: 6px;
+            color: var(--text-dim);
+            margin-top: 15px;
+        }
+
+        .deposit-form {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .deposit-balance {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--green);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .balance-label {
+            font-size: 8px;
+            color: var(--text-dim);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .balance-value {
+            font-size: 18px;
+            color: var(--green);
+            text-shadow: 0 0 10px var(--green);
+        }
+
+        .deposit-input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            font-size: 8px;
+            color: var(--text-dim);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .deposit-input {
+            flex: 1;
+            background: var(--bg-dark);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .deposit-input:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .deposit-input::placeholder {
+            color: var(--text-dim);
+        }
+
+        .max-btn {
+            background: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            padding: 15px 20px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 8px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .max-btn:hover {
+            background: var(--accent);
+        }
+
+        .deposit-info {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 8px;
+            color: var(--text-dim);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-value {
+            color: var(--secondary);
+        }
+
+        .deposit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 18px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+        }
+
+        .deposit-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+        }
+
+        .deposit-disclaimer {
+            font-size: 6px;
+            color: var(--text-dim);
+            text-align: center;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-box {
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 400px;
+            text-align: center;
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 14px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .modal-text {
+            font-size: 8px;
+            color: var(--text-dim);
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .modal-btn {
+            background: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            padding: 12px 25px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 8px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn:hover {
+            background: var(--accent);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            border-top: 2px solid var(--primary);
+        }
+
+        .footer-links {
+            margin-bottom: 15px;
+        }
+
+        .footer-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 10px;
+            margin: 0 15px;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .footer-status {
+            font-size: 8px;
+            color: var(--green);
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 14px;
+            }
+
+            .butt-logo {
+                width: 60px;
+                height: 60px;
+                font-size: 45px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-icon {
+                font-size: 24px;
+            }
+
+            .stat-value {
+                font-size: 12px;
+            }
+
+            .price-value {
+                font-size: 20px;
+            }
+
+            .wallet-table th,
+            .wallet-table td {
+                padding: 8px 4px;
+                font-size: 5px;
+            }
+
+            .flywheel-steps {
+                flex-direction: column;
+            }
+
+            .flywheel-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+    <div class="crt-flicker"></div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-container">
+                <div class="butt-logo">🍑</div>
+                <div>
+                    <h1 class="title">Buttcoin Flywheel Ponzi</h1>
+                    <p class="subtitle">Powered by OG $BUTTCOIN Holders</p>
+                </div>
+            </div>
+            <div class="header-info">
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">FLYWHEEL SPINNING</span>
+                </div>
+                <div class="countdown-header">
+                    <span class="countdown-label">NEXT CYCLE IN</span>
+                    <span class="countdown-timer" id="countdown">--:--</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Flywheel Explainer -->
+        <section class="flywheel-explainer">
+            <h2 class="flywheel-title">🔄 HOW THE FLYWHEEL WORKS</h2>
+            <div class="flywheel-steps">
+                <div class="flywheel-step">🍑 OG BUTTCOIN<br>HOLDERS</div>
+                <span class="flywheel-arrow">→</span>
+                <div class="flywheel-step">💰 BUY<br>BUTTPONZI</div>
+                <span class="flywheel-arrow">→</span>
+                <div class="flywheel-step">🔥 TOKEN<br>BURNS</div>
+                <span class="flywheel-arrow">→</span>
+                <div class="flywheel-step">📈 PRICE<br>PUMPS</div>
+                <span class="flywheel-arrow">→</span>
+                <div class="flywheel-step">🔄 REPEAT</div>
+            </div>
+            <p class="flywheel-desc">
+                OG $BUTTCOIN holders are the engine of this ponzi.<br>
+                Their bags fuel our burns. Their diamond hands power our pumps.
+            </p>
+        </section>
+
+        <!-- Stats Grid -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-content">
+                    <span class="stat-label">TOKENS BURNED</span>
+                    <span class="stat-value" id="tokens-burned">---</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-content">
+                    <span class="stat-label">USD BURNED</span>
+                    <span class="stat-value" id="usd-burned">$---</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">◎</div>
+                <div class="stat-content">
+                    <span class="stat-label">SOL SPENT</span>
+                    <span class="stat-value" id="sol-spent">---</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🍑</div>
+                <div class="stat-content">
+                    <span class="stat-label">CYCLES</span>
+                    <span class="stat-value" id="cycles">---</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contract Addresses -->
+        <section class="contract-section">
+            <div class="contract-row">
+                <div class="contract-item">
+                    <div class="contract-label og">⭐ OG BUTTCOIN TOKEN (THE ENGINE)</div>
+                    <div class="contract-address">
+                        <span class="address-text" id="og-buttcoin">Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump</span>
+                        <button class="copy-btn" onclick="copyToClipboard('og-buttcoin')">COPY</button>
+                    </div>
+                </div>
+                <div class="contract-item">
+                    <div class="contract-label">🍑 BUTTPONZI TOKEN (THE FLYWHEEL)</div>
+                    <div class="contract-address">
+                        <span class="address-text" id="buttponzi-ca">YOUR_BUTTPONZI_CA_HERE</span>
+                        <button class="copy-btn" onclick="copyToClipboard('buttponzi-ca')">COPY</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wallet Screener -->
+        <section class="wallet-screener">
+            <div class="screener-header">
+                <h2 class="section-title">🔍 BUTTCOIN HOLDER SCREENER</h2>
+                <div class="screener-stats">
+                    <div class="screener-stat">
+                        <span class="screener-stat-label">TRACKED WALLETS</span>
+                        <span class="screener-stat-value" id="tracked-count">5</span>
+                    </div>
+                    <div class="screener-stat">
+                        <span class="screener-stat-label">TOTAL $BUTT HELD</span>
+                        <span class="screener-stat-value" id="total-butt">---</span>
+                    </div>
+                    <div class="screener-stat">
+                        <span class="screener-stat-label">FLYWHEEL POWER</span>
+                        <span class="screener-stat-value" id="flywheel-power">---</span>
+                    </div>
+                </div>
+            </div>
+            
+            <table class="wallet-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>WALLET</th>
+                        <th>$BUTTCOIN BALANCE</th>
+                        <th>% OF SUPPLY</th>
+                        <th>FLYWHEEL STATUS</th>
+                        <th>LAST ACTIVITY</th>
+                    </tr>
+                </thead>
+                <tbody id="wallet-tbody">
+                    <!-- Wallets will be populated here -->
+                </tbody>
+            </table>
+            
+            <p style="font-size: 6px; color: var(--text-dim); text-align: center;">
+                These OG $BUTTCOIN holders are tracked for flywheel activity. When they move, we burn. 🔥
+            </p>
+        </section>
+
+
+
+        <!-- Deposit Tab -->
+        <section class="deposit-section">
+            <div class="deposit-header">
+                <h2 class="section-title deposit-title">🍑 DEPOSIT & FLYWHEEL</h2>
+                <div class="wallet-status" id="wallet-status">
+                    <span class="wallet-dot disconnected"></span>
+                    <span class="wallet-text">NOT CONNECTED</span>
+                </div>
+            </div>
+
+            <div class="deposit-content">
+                <div class="connect-wallet-box" id="connect-box">
+                    <div class="phantom-logo">👻</div>
+                    <p class="connect-prompt">Connect your wallet to deposit $BUTTCOIN and power the flywheel</p>
+                    <button class="phantom-btn" id="connect-btn" onclick="connectPhantom()">
+                        <span class="phantom-icon">👻</span>
+                        Connect Phantom
+                    </button>
+                    <p class="wallet-note">Supports Phantom Wallet on Solana</p>
+                </div>
+
+                <div class="deposit-form" id="deposit-form" style="display: none;">
+                    <div class="deposit-balance">
+                        <span class="balance-label">YOUR $BUTTCOIN BALANCE</span>
+                        <span class="balance-value" id="user-balance">0 🍑</span>
+                    </div>
+                    
+                    <div class="deposit-input-group">
+                        <label class="input-label">AMOUNT TO DEPOSIT</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="deposit-input" id="deposit-amount" placeholder="0.00" />
+                            <button class="max-btn" onclick="setMax()">MAX</button>
+                        </div>
+                    </div>
+
+                    <div class="deposit-info">
+                        <div class="info-row">
+                            <span>Flywheel Power Boost</span>
+                            <span class="info-value" id="power-boost">+0%</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Est. Burn Contribution</span>
+                            <span class="info-value" id="burn-contrib">0 tokens</span>
+                        </div>
+                        <div class="info-row">
+                            <span>Your Rank After Deposit</span>
+                            <span class="info-value" id="rank-after">#---</span>
+                        </div>
+                    </div>
+
+                    <button class="deposit-btn" onclick="fakeDeposit()">
+                        🔥 DEPOSIT & FLYWHEEL 🔥
+                    </button>
+
+                    <p class="deposit-disclaimer">
+                        By depositing, you agree to fuel the ponzi. No refunds. Only up. 🍑
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Burn History -->
+        <section class="burn-history">
+            <h2 class="burn-title">🔥 BURN HISTORY</h2>
+            <table class="burn-table">
+                <thead>
+                    <tr>
+                        <th>TIME</th>
+                        <th>TRIGGERED BY</th>
+                        <th>TOKENS BURNED</th>
+                        <th>USD VALUE</th>
+                        <th>SOL</th>
+                    </tr>
+                </thead>
+                <tbody id="burn-history-body">
+                    <tr>
+                        <td colspan="5" class="empty-state">FLYWHEEL WARMING UP... 🍑</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="https://pump.fun/coin/Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump" target="_blank">PUMP.FUN</a>
+                <span style="color: var(--text-dim);">|</span>
+
+                <a href="https://solscan.io/token/Cm6fNnMk7NfzStP9CZpsQA2v3jjzbcYGAxdJySmHpump" target="_blank">SOLSCAN</a>
+            </div>
+            <div class="footer-status">FLYWHEEL ACTIVE 24/7 🍑</div>
+        </footer>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-box">
+            <div class="modal-icon" id="modal-icon">👻</div>
+            <h3 class="modal-title" id="modal-title">COMING SOON</h3>
+            <p class="modal-text" id="modal-text">
+                Phantom wallet integration is coming soon!<br><br>
+                The flywheel is warming up. Check back later to deposit your $BUTTCOIN and power the ponzi.
+            </p>
+            <button class="modal-btn" onclick="closeModal()">GOT IT 🍑</button>
+        </div>
+    </div>
+
+    <script>
+        // Modal functions
+        function showModal(icon, title, text) {
+            document.getElementById('modal-icon').textContent = icon;
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-text').innerHTML = text;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // Phantom Wallet Connection
+        let connectedWallet = null;
+
+        async function connectPhantom() {
+            // Check if Phantom is installed
+            const isPhantomInstalled = window.solana && window.solana.isPhantom;
+            
+            if (!isPhantomInstalled) {
+                showModal(
+                    '👻',
+                    'PHANTOM NOT FOUND',
+                    'Phantom wallet is not installed!<br><br><a href="https://phantom.app/" target="_blank" style="color: #ab9ff2;">Download Phantom</a> to connect and fuel the flywheel. 🍑'
+                );
+                return;
+            }
+
+            try {
+                // Request connection
+                const response = await window.solana.connect();
+                connectedWallet = response.publicKey.toString();
+                
+                // Update UI
+                updateWalletUI(true);
+                
+                // Show success
+                showModal(
+                    '🍑',
+                    'WALLET CONNECTED',
+                    `Connected: ${shortenAddress(connectedWallet)}<br><br>Your cheeks are now clenched and ready to flywheel! 🔥`
+                );
+
+                // Show deposit form
+                document.getElementById('connect-box').style.display = 'none';
+                document.getElementById('deposit-form').style.display = 'block';
+
+                // Simulate fetching balance (in real app, fetch from chain)
+                simulateUserBalance();
+
+            } catch (err) {
+                console.error('Connection error:', err);
+                if (err.code === 4001) {
+                    showModal(
+                        '😢',
+                        'CONNECTION REJECTED',
+                        'You rejected the connection request.<br><br>The flywheel needs your $BUTTCOIN to spin! 🍑'
+                    );
+                } else {
+                    showModal(
+                        '❌',
+                        'CONNECTION FAILED',
+                        'Something went wrong connecting to Phantom.<br><br>Please try again. 🍑'
+                    );
+                }
+            }
+        }
+
+        function disconnectWallet() {
+            if (window.solana) {
+                window.solana.disconnect();
+            }
+            connectedWallet = null;
+            updateWalletUI(false);
+            document.getElementById('connect-box').style.display = 'block';
+            document.getElementById('deposit-form').style.display = 'none';
+        }
+
+        function updateWalletUI(connected) {
+            const dot = document.querySelector('.wallet-dot');
+            const text = document.querySelector('.wallet-text');
+            
+            if (connected) {
+                dot.classList.remove('disconnected');
+                dot.classList.add('connected');
+                text.textContent = shortenAddress(connectedWallet);
+                text.style.cursor = 'pointer';
+                text.onclick = disconnectWallet;
+                text.title = 'Click to disconnect';
+            } else {
+                dot.classList.remove('connected');
+                dot.classList.add('disconnected');
+                text.textContent = 'NOT CONNECTED';
+                text.style.cursor = 'default';
+                text.onclick = null;
+                text.title = '';
+            }
+        }
+
+        function shortenAddress(address) {
+            return address.slice(0, 4) + '...' + address.slice(-4);
+        }
+
+        function simulateUserBalance() {
+            // Simulate a random buttcoin balance (in real app, fetch from chain)
+            const balance = Math.floor(Math.random() * 50000000) + 1000000;
+            document.getElementById('user-balance').textContent = formatNumber(balance) + ' 🍑';
+        }
+
+        // Fake deposit (still not functional)
+        function fakeDeposit() {
+            showModal(
+                '🔥',
+                'FLYWHEEL LOADING...',
+                'Deposit functionality is coming soon!<br><br>Your wallet is connected and ready. Soon you\'ll be able to fuel the flywheel with your $BUTTCOIN bags. 🍑'
+            );
+        }
+
+        // Set max (fake)
+        function setMax() {
+            document.getElementById('deposit-amount').value = '69,420,000';
+            document.getElementById('power-boost').textContent = '+420%';
+            document.getElementById('burn-contrib').textContent = '6,942,000 tokens';
+            document.getElementById('rank-after').textContent = '#1 🏆';
+        }
+
+        // Listen for account changes
+        if (window.solana) {
+            window.solana.on('accountChanged', (publicKey) => {
+                if (publicKey) {
+                    connectedWallet = publicKey.toString();
+                    updateWalletUI(true);
+                    simulateUserBalance();
+                } else {
+                    disconnectWallet();
+                }
+            });
+
+            window.solana.on('disconnect', () => {
+                disconnectWallet();
+            });
+
+            // Auto-connect if previously connected
+            if (window.solana.isConnected) {
+                window.solana.connect({ onlyIfTrusted: true })
+                    .then(response => {
+                        connectedWallet = response.publicKey.toString();
+                        updateWalletUI(true);
+                        document.getElementById('connect-box').style.display = 'none';
+                        document.getElementById('deposit-form').style.display = 'block';
+                        simulateUserBalance();
+                    })
+                    .catch(() => {});
+            }
+        }
+
+        // Close modal on overlay click
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Tracked wallets - these are the OG Buttcoin holders
+        const trackedWallets = [
+            {
+                address: 'DUXoQ3QDVdhKBqeiwNoibcbuBYsWN2KF38TWJSGX8x6m',
+                shortAddress: 'DUXo...8x6m',
+                balance: 42069000,
+                percentage: 4.21,
+                status: 'active',
+                lastActivity: '2 min ago'
+            },
+            {
+                address: 'BLATZTEma6TpWJJJ1wouW4UNKWckLqrHfthvKQwQTNYj',
+                shortAddress: 'BLAT...TNYj',
+                balance: 31337000,
+                percentage: 3.13,
+                status: 'ready',
+                lastActivity: '15 min ago'
+            },
+            {
+                address: '31ysLDfvi5wBhkJxN6gNNMoXKZ4RQ41wLC8nVFMzT7s6',
+                shortAddress: '31ys...T7s6',
+                balance: 25000000,
+                percentage: 2.50,
+                status: 'ready',
+                lastActivity: '1 hr ago'
+            },
+            {
+                address: 'GkmyxRwPPwfRZK668SrjwAvv5hbVCkUgXFUu6eQ7Et3S',
+                shortAddress: 'Gkmy...Et3S',
+                balance: 18500000,
+                percentage: 1.85,
+                status: 'pending',
+                lastActivity: '3 hr ago'
+            },
+            {
+                address: '7z59S1z1gYwkMvAXXJPB91jRp2RC77wFrjwKZvWmsF5v',
+                shortAddress: '7z59...sF5v',
+                balance: 12000000,
+                percentage: 1.20,
+                status: 'active',
+                lastActivity: '5 min ago'
+            }
+        ];
+
+        // Populate wallet table
+        function populateWallets() {
+            const tbody = document.getElementById('wallet-tbody');
+            const maxBalance = Math.max(...trackedWallets.map(w => w.balance));
+            
+            tbody.innerHTML = trackedWallets.map((wallet, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>
+                        <a href="https://solscan.io/account/${wallet.address}" 
+                           target="_blank" 
+                           class="wallet-link wallet-address">
+                            ${wallet.shortAddress}
+                        </a>
+                    </td>
+                    <td>
+                        ${formatNumber(wallet.balance)} 🍑
+                        <div class="balance-bar">
+                            <div class="balance-fill" style="width: ${(wallet.balance / maxBalance) * 100}%"></div>
+                        </div>
+                    </td>
+                    <td>${wallet.percentage.toFixed(2)}%</td>
+                    <td><span class="status-badge ${wallet.status}">${wallet.status.toUpperCase()}</span></td>
+                    <td>${wallet.lastActivity}</td>
+                </tr>
+            `).join('');
+
+            // Update totals
+            const totalButt = trackedWallets.reduce((sum, w) => sum + w.balance, 0);
+            document.getElementById('total-butt').textContent = formatNumber(totalButt);
+            document.getElementById('flywheel-power').textContent = '🔥🔥🔥';
+        }
+
+        // Format numbers with commas
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // Countdown timer
+        function updateCountdown() {
+            const now = new Date();
+            const nextHour = new Date(now);
+            nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
+            
+            const diff = nextHour - now;
+            const minutes = Math.floor(diff / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            
+            document.getElementById('countdown').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Copy to clipboard
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'COPIED!';
+                setTimeout(() => btn.textContent = originalText, 2000);
+            });
+        }
+
+        // Simulate stats
+        function simulateStats() {
+            document.getElementById('tokens-burned').textContent = '420,690,000';
+            document.getElementById('usd-burned').textContent = '$69,420';
+            document.getElementById('sol-spent').textContent = '1,337';
+            document.getElementById('cycles').textContent = '69';
+
+        }
+
+        // Simulate burn history
+        function simulateBurnHistory() {
+            const burns = [
+                { time: '2 min ago', wallet: 'DUXo...8x6m', tokens: '1,000,000', usd: '$420', sol: '2.1' },
+                { time: '15 min ago', wallet: 'BLAT...TNYj', tokens: '500,000', usd: '$210', sol: '1.05' },
+                { time: '1 hr ago', wallet: '7z59...sF5v', tokens: '2,500,000', usd: '$1,050', sol: '5.25' },
+            ];
+
+            const tbody = document.getElementById('burn-history-body');
+            tbody.innerHTML = burns.map(burn => `
+                <tr>
+                    <td>${burn.time}</td>
+                    <td><span class="wallet-address">${burn.wallet}</span></td>
+                    <td>${burn.tokens}</td>
+                    <td>${burn.usd}</td>
+                    <td>◎${burn.sol}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Initialize
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+        populateWallets();
+        
+        setTimeout(() => {
+            simulateStats();
+            simulateBurnHistory();
+        }, 1500);
+
+        // Randomly update wallet statuses for effect
+        setInterval(() => {
+            const statuses = document.querySelectorAll('.status-badge');
+            const randomIndex = Math.floor(Math.random() * statuses.length);
+            const statusTypes = ['ready', 'pending', 'active'];
+            statuses[randomIndex].className = 'status-badge ' + statusTypes[Math.floor(Math.random() * statusTypes.length)];
+            statuses[randomIndex].textContent = statuses[randomIndex].className.split(' ')[1].toUpperCase();
+        }, 5000);
+    </script>
+</body>
+</html>
